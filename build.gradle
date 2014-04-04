@@ -1,0 +1,50 @@
+apply plugin: 'java'
+apply plugin: 'application'
+
+sourceCompatibility = '1.8'
+[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+
+if (!hasProperty('mainClass')) {
+    ext.mainClass = 'foo.Main'
+}
+
+repositories {
+    mavenLocal();
+    mavenCentral();
+}
+
+configurations {
+    quasar
+}
+
+dependencies {
+    compile "co.paralleluniverse:quasar-core:0.5.0:jdk8"
+    quasar "co.paralleluniverse:quasar-core:0.5.0:jdk8"
+    compile "co.paralleluniverse:quasar-actors:0.5.0"
+    testCompile group: 'junit', name: 'junit', version: '4.10'
+}
+
+run {
+    classpath = sourceSets.main.runtimeClasspath
+    if(project.hasProperty('args')){
+        args project.args.split('\\s+')
+    }
+    if(project.hasProperty('mainClass')){
+        main = project.mainClass
+    }
+}
+
+tasks.withType(JavaExec) {
+    jvmArgs '-server'
+    jvmArgs "-javaagent:${configurations.quasar.iterator().next()}" // =vdmc (verbose, debug, allow monitors, check class)
+    // systemProperty "co.paralleluniverse.fibers.DefaultFiberPool.parallelism", "4"
+    systemProperty "co.paralleluniverse.fibers.DefaultFiberPool.monitor", "JMX" // "METRICS" // "NONE" //
+    systemProperty "co.paralleluniverse.actors.moduleDir", "${rootProject.projectDir}/modules"
+    
+    // memory
+    jvmArgs '-Xmx1024m'
+    
+    // debugging
+    // jvmArgs '-ea'
+    // systemProperty 'co.paralleluniverse.fibers.verifyInstrumentation', 'true'
+}
