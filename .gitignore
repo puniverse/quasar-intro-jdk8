@@ -1,0 +1,10 @@
+.DS_Store
+/dist/
+/out/
+_site/
+/docs/javadoc/
+.idea/
+*.iml
+/artifacts
+/nbproject/private/
+.bdb/
